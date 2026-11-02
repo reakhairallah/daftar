@@ -1,0 +1,1 @@
+export default function MyReviews() { return <h1 className="font-display text-4xl font-semibold">My reviews</h1>; }

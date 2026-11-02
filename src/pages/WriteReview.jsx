@@ -1,0 +1,1 @@
+export default function WriteReview() { return <h1 className="font-display text-4xl font-semibold">Write a review</h1>; }
