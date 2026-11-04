@@ -16,7 +16,7 @@ export default function App() {
         <Route path="/reviews/new" element={<WriteReview />} />
         <Route path="/me/reviews" element={<MyReviews />} />
         <Route path="*" element={<NotFound />} />
-        <Route path="/login" element={<LoginForm />} />
+        <Route path="/signin" element={<LoginForm />} />
       </Route>
 
     </Routes>
