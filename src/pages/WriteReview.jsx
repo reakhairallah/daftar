@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import SelectField from "../components/write-review/SelectField";
 import TextField from "../components/write-review/TextField";
+import StarRating from "../components/StarRating";
+import DifficultyMeter from "../components/DifficultyMeter";
 import FieldMessage from "../components/write-review/FieldMessage";
 import { labelClass } from "../components/write-review/fieldStyles";
 import { validateReview, MIN_BODY } from "../utils/validateReview";
@@ -37,8 +39,6 @@ const emptyForm = {
   anonymous: false,
 };
 
-const oneToFive = [1, 2, 3, 4, 5];
-const difficultyShades = ["bg-brand-300", "bg-brand-400", "bg-brand-500", "bg-brand-600", "bg-brand-700"];
 
 export default function WriteReview() {
   const [form, setForm] = useState(emptyForm);
@@ -117,48 +117,16 @@ export default function WriteReview() {
           aria-describedby={shownErrors.rating ? "r-rating-msg" : undefined}
         >
           <legend className={labelClass}>Overall rating</legend>
-          <div className="mt-1.5 flex items-center gap-3">
-            <div className="flex gap-1">
-              {oneToFive.map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  aria-label={`${n} star${n > 1 ? "s" : ""}`}
-                  aria-pressed={n === form.rating}
-                  onClick={() => updateField("rating", n)}
-                  className={`inline-flex h-10 w-10 items-center justify-center rounded border ${
-                    n <= form.rating ? "border-accent-400 bg-accent-50" : "border-line bg-surface"
-                  }`}
-                >
-                  <svg viewBox="0 0 20 20" className={`h-5 w-5 ${n <= form.rating ? "text-accent-400" : "text-line"}`} fill="currentColor" aria-hidden="true">
-                    <path d="M10 1.8l2.5 5.1 5.6.8-4 4 .9 5.6-5-2.6-5 2.6.9-5.6-4-4 5.6-.8z" />
-                  </svg>
-                </button>
-              ))}
-            </div>
-            <span className="font-display text-lg font-semibold tabular-nums text-ink">{form.rating || "–"}</span>
+          <div className="mt-1.5">
+            <StarRating value={form.rating} onChange={(value) => updateField("rating", value)} />
           </div>
           <FieldMessage id="r-rating-msg" error={shownErrors.rating} />
         </fieldset>
 
         <fieldset className="flex flex-col gap-1.5" aria-describedby="r-diff-msg">
           <legend className={labelClass}>Difficulty</legend>
-          <div className="mt-1.5 flex w-full max-w-xs items-center gap-2">
-            <div className="flex flex-1 gap-[2px]">
-              {oneToFive.map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  aria-label={`Difficulty ${n} of 5`}
-                  aria-pressed={n === form.difficulty}
-                  onClick={() => updateField("difficulty", n)}
-                  className={`h-2 flex-1 rounded-[2px] ${n <= form.difficulty ? difficultyShades[n - 1] : "bg-line"}`}
-                />
-              ))}
-            </div>
-            <span className="font-display text-sm font-semibold tabular-nums text-ink">
-              {form.difficulty || "–"}<span className="text-muted">/5</span>
-            </span>
+          <div className="mt-1.5 max-w-xs">
+            <DifficultyMeter value={form.difficulty} onChange={(value) => updateField("difficulty", value)} />
           </div>
           <FieldMessage
             id="r-diff-msg"
