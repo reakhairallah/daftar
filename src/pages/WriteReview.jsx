@@ -4,6 +4,7 @@ import SelectField from "../components/write-review/SelectField";
 import TextField from "../components/write-review/TextField";
 import FieldMessage from "../components/write-review/FieldMessage";
 import { labelClass } from "../components/write-review/fieldStyles";
+import { validateReview, MIN_BODY } from "../utils/validateReview";
 
 // TEMP: hard-coded lists
 const courses = [
@@ -36,29 +37,6 @@ const emptyForm = {
   anonymous: false,
 };
 
-const MAX_HOURS = 30;
-const MIN_BODY = 40;
-
-function validate(form) {
-  const errors = {};
-  if (!form.courseCode) errors.courseCode = "Choose the course you took.";
-  if (!form.instructorId) errors.instructorId = "Choose who taught it.";
-  if (!form.termId) errors.termId = "Choose the term you took it.";
-
-  const hours = Number(form.hoursPerWeek);
-  if (form.hoursPerWeek === "") errors.hoursPerWeek = "Enter the hours a week, a rough guess is fine.";
-  else if (!Number.isInteger(hours) || hours < 0) errors.hoursPerWeek = "Enter a whole number of hours.";
-  else if (hours > MAX_HOURS) errors.hoursPerWeek = `${hours} hours a week on one three-credit course is almost certainly a typo.`;
-
-  if (!form.rating) errors.rating = "Choose a rating from 1 to 5 stars.";
-  if (!form.difficulty) errors.difficulty = "Choose a difficulty from 1 to 5.";
-  if (form.wouldTakeAgain === null) errors.wouldTakeAgain = "Choose yes or no.";
-
-  const length = form.body.trim().length;
-  if (length < MIN_BODY) errors.body = `Write at least ${MIN_BODY} characters (${length} so far).`;
-  return errors;
-}
-
 const oneToFive = [1, 2, 3, 4, 5];
 const difficultyShades = ["bg-brand-300", "bg-brand-400", "bg-brand-500", "bg-brand-600", "bg-brand-700"];
 
@@ -67,7 +45,7 @@ export default function WriteReview() {
   const [touched, setTouched] = useState({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
-  const errors = validate(form);
+  const errors = validateReview(form);
 
   const shownErrors = {};
   for (const name in errors) {
@@ -224,7 +202,7 @@ export default function WriteReview() {
           value={form.body}
           onChange={(value) => updateField("body", value)}
           error={shownErrors.body}
-          help="Minimum 40 characters. Say something a reader could act on."
+          help={`Minimum ${MIN_BODY} characters. Say something a reader could act on.`}
         />
 
         <label className="flex cursor-pointer items-start gap-3 rounded-card border border-line bg-brand-50/50 p-4">
