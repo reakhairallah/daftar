@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import SelectField from "../components/write-review/SelectField";
+import FieldMessage from "../components/write-review/FieldMessage";
+import { labelClass, inputClass } from "../components/write-review/fieldStyles";
 
 // TEMP: hard-coded lists
 const courses = [
@@ -15,6 +18,10 @@ const terms = [
   { id: "spring-2026", season: "Spring", year: 2026 },
   { id: "fall-2025", season: "Fall", year: 2025 },
 ];
+
+const courseOptions = courses.map((c) => ({ value: c.code, label: `${c.code} · ${c.title}` }));
+const instructorOptions = instructors.map((i) => ({ value: i.id, label: i.name }));
+const termOptions = terms.map((t) => ({ value: t.id, label: `${t.season} ${t.year}` }));
 
 const emptyForm = {
   courseCode: "",
@@ -49,20 +56,6 @@ function validate(form) {
   const length = form.body.trim().length;
   if (length < MIN_BODY) errors.body = `Write at least ${MIN_BODY} characters (${length} so far).`;
   return errors;
-}
-
-function Message({ id, error, help }) {
-  if (error) return <p id={id} className="text-xs font-semibold text-red-700">{error}</p>;
-  if (help) return <p id={id} className="text-xs text-muted">{help}</p>;
-  return null;
-}
-
-const labelClass = "text-[11px] font-semibold uppercase tracking-[0.13em] text-muted";
-function inputClass(error) {
-  const base = "w-full rounded border bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:outline-none focus:ring-4";
-  return error
-    ? `${base} border-red-500 focus:border-red-600 focus:ring-red-100`
-    : `${base} border-line focus:border-brand-500 focus:ring-brand-100`;
 }
 
 const oneToFive = [1, 2, 3, 4, 5];
@@ -100,63 +93,33 @@ export default function WriteReview() {
 
       <form className="mt-10 max-w-3xl space-y-7" onSubmit={handleSubmit} noValidate>
         <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="r-course" className={labelClass}>Course</label>
-            <select
-              id="r-course"
-              className={inputClass(errorFor("courseCode"))}
-              aria-invalid={Boolean(errorFor("courseCode"))}
-              aria-describedby={errorFor("courseCode") ? "r-course-msg" : undefined}
-              value={form.courseCode}
-              onChange={(e) => updateField("courseCode", e.target.value)}
-            >
-              <option value="">Choose one</option>
-              {courses.map((c) => (
-                <option key={c.code} value={c.code}>{c.code} · {c.title}</option>
-              ))}
-            </select>
-            <Message id="r-course-msg" error={errorFor("courseCode")} />
-          </div>
+          <SelectField
+            id="r-course"
+            label="Course"
+            options={courseOptions}
+            value={form.courseCode}
+            onChange={(value) => updateField("courseCode", value)}
+            error={errorFor("courseCode")}
+          />
 
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="r-inst" className={labelClass}>Instructor</label>
-            <select
-              id="r-inst"
-              className={inputClass(errorFor("instructorId"))}
-              aria-invalid={Boolean(errorFor("instructorId"))}
-              aria-describedby="r-inst-msg"
-              value={form.instructorId}
-              onChange={(e) => updateField("instructorId", e.target.value)}
-            >
-              <option value="">Choose one</option>
-              {instructors.map((i) => (
-                <option key={i.id} value={i.id}>{i.name}</option>
-              ))}
-            </select>
-            <Message
-              id="r-inst-msg"
-              error={errorFor("instructorId")}
-              help="Reviews are tied to who taught it. The same course with a different instructor is a different review."
-            />
-          </div>
+          <SelectField
+            id="r-inst"
+            label="Instructor"
+            options={instructorOptions}
+            value={form.instructorId}
+            onChange={(value) => updateField("instructorId", value)}
+            error={errorFor("instructorId")}
+            help="Reviews are tied to who taught it. The same course with a different instructor is a different review."
+          />
 
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="r-term" className={labelClass}>Term</label>
-            <select
-              id="r-term"
-              className={inputClass(errorFor("termId"))}
-              aria-invalid={Boolean(errorFor("termId"))}
-              aria-describedby={errorFor("termId") ? "r-term-msg" : undefined}
-              value={form.termId}
-              onChange={(e) => updateField("termId", e.target.value)}
-            >
-              <option value="">Choose one</option>
-              {terms.map((t) => (
-                <option key={t.id} value={t.id}>{t.season} {t.year}</option>
-              ))}
-            </select>
-            <Message id="r-term-msg" error={errorFor("termId")} />
-          </div>
+          <SelectField
+            id="r-term"
+            label="Term"
+            options={termOptions}
+            value={form.termId}
+            onChange={(value) => updateField("termId", value)}
+            error={errorFor("termId")}
+          />
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="r-hours" className={labelClass}>Hours a week, outside class</label>
@@ -170,7 +133,7 @@ export default function WriteReview() {
               value={form.hoursPerWeek}
               onChange={(e) => updateField("hoursPerWeek", e.target.value)}
             />
-            <Message id="r-hours-msg" error={errorFor("hoursPerWeek")} />
+            <FieldMessage id="r-hours-msg" error={errorFor("hoursPerWeek")} />
           </div>
         </div>
 
@@ -200,7 +163,7 @@ export default function WriteReview() {
             </div>
             <span className="font-display text-lg font-semibold tabular-nums text-ink">{form.rating || "–"}</span>
           </div>
-          <Message id="r-rating-msg" error={errorFor("rating")} />
+          <FieldMessage id="r-rating-msg" error={errorFor("rating")} />
         </fieldset>
 
         <fieldset className="flex flex-col gap-1.5" aria-describedby="r-diff-msg">
@@ -222,7 +185,7 @@ export default function WriteReview() {
               {form.difficulty || "–"}<span className="text-muted">/5</span>
             </span>
           </div>
-          <Message
+          <FieldMessage
             id="r-diff-msg"
             error={errorFor("difficulty")}
             help="Hard is not the same as bad. A course can be five stars and five difficulty."
@@ -252,7 +215,7 @@ export default function WriteReview() {
               </button>
             ))}
           </div>
-          <Message id="r-again-msg" error={errorFor("wouldTakeAgain")} />
+          <FieldMessage id="r-again-msg" error={errorFor("wouldTakeAgain")} />
         </fieldset>
 
         <div className="flex flex-col gap-1.5">
@@ -267,7 +230,7 @@ export default function WriteReview() {
             value={form.body}
             onChange={(e) => updateField("body", e.target.value)}
           />
-          <Message
+          <FieldMessage
             id="r-body-msg"
             error={errorFor("body")}
             help="Minimum 40 characters. Say something a reader could act on."
