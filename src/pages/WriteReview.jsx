@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import SelectField from "../components/write-review/SelectField";
+import TextField from "../components/write-review/TextField";
 import FieldMessage from "../components/write-review/FieldMessage";
-import { labelClass, inputClass } from "../components/write-review/fieldStyles";
+import { labelClass } from "../components/write-review/fieldStyles";
 
 // TEMP: hard-coded lists
 const courses = [
@@ -68,11 +69,12 @@ export default function WriteReview() {
 
   const errors = validate(form);
 
-  function errorFor(name) {
-    return touched[name] || submitAttempted ? errors[name] : undefined;
+  const shownErrors = {};
+  for (const name in errors) {
+    if (touched[name] || submitAttempted) shownErrors[name] = errors[name];
   }
 
-  const shownErrorCount = Object.keys(errors).filter((name) => errorFor(name)).length;
+  const shownErrorCount = Object.keys(shownErrors).length;
 
   function updateField(name, value) {
     setForm({ ...form, [name]: value });
@@ -99,7 +101,7 @@ export default function WriteReview() {
             options={courseOptions}
             value={form.courseCode}
             onChange={(value) => updateField("courseCode", value)}
-            error={errorFor("courseCode")}
+            error={shownErrors.courseCode}
           />
 
           <SelectField
@@ -108,7 +110,7 @@ export default function WriteReview() {
             options={instructorOptions}
             value={form.instructorId}
             onChange={(value) => updateField("instructorId", value)}
-            error={errorFor("instructorId")}
+            error={shownErrors.instructorId}
             help="Reviews are tied to who taught it. The same course with a different instructor is a different review."
           />
 
@@ -118,28 +120,23 @@ export default function WriteReview() {
             options={termOptions}
             value={form.termId}
             onChange={(value) => updateField("termId", value)}
-            error={errorFor("termId")}
+            error={shownErrors.termId}
           />
 
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="r-hours" className={labelClass}>Hours a week, outside class</label>
-            <input
-              id="r-hours"
-              type="number"
-              min="0"
-              className={inputClass(errorFor("hoursPerWeek"))}
-              aria-invalid={Boolean(errorFor("hoursPerWeek"))}
-              aria-describedby={errorFor("hoursPerWeek") ? "r-hours-msg" : undefined}
-              value={form.hoursPerWeek}
-              onChange={(e) => updateField("hoursPerWeek", e.target.value)}
-            />
-            <FieldMessage id="r-hours-msg" error={errorFor("hoursPerWeek")} />
-          </div>
+          <TextField
+            id="r-hours"
+            label="Hours a week, outside class"
+            type="number"
+            min="0"
+            value={form.hoursPerWeek}
+            onChange={(value) => updateField("hoursPerWeek", value)}
+            error={shownErrors.hoursPerWeek}
+          />
         </div>
 
         <fieldset
           className="flex flex-col gap-1.5"
-          aria-describedby={errorFor("rating") ? "r-rating-msg" : undefined}
+          aria-describedby={shownErrors.rating ? "r-rating-msg" : undefined}
         >
           <legend className={labelClass}>Overall rating</legend>
           <div className="mt-1.5 flex items-center gap-3">
@@ -163,7 +160,7 @@ export default function WriteReview() {
             </div>
             <span className="font-display text-lg font-semibold tabular-nums text-ink">{form.rating || "–"}</span>
           </div>
-          <FieldMessage id="r-rating-msg" error={errorFor("rating")} />
+          <FieldMessage id="r-rating-msg" error={shownErrors.rating} />
         </fieldset>
 
         <fieldset className="flex flex-col gap-1.5" aria-describedby="r-diff-msg">
@@ -187,14 +184,14 @@ export default function WriteReview() {
           </div>
           <FieldMessage
             id="r-diff-msg"
-            error={errorFor("difficulty")}
+            error={shownErrors.difficulty}
             help="Hard is not the same as bad. A course can be five stars and five difficulty."
           />
         </fieldset>
 
         <fieldset
           className="flex flex-col gap-1.5"
-          aria-describedby={errorFor("wouldTakeAgain") ? "r-again-msg" : undefined}
+          aria-describedby={shownErrors.wouldTakeAgain ? "r-again-msg" : undefined}
         >
           <legend className={labelClass}>Would you take it again</legend>
           <div className="mt-1.5 flex gap-3">
@@ -215,27 +212,20 @@ export default function WriteReview() {
               </button>
             ))}
           </div>
-          <FieldMessage id="r-again-msg" error={errorFor("wouldTakeAgain")} />
+          <FieldMessage id="r-again-msg" error={shownErrors.wouldTakeAgain} />
         </fieldset>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="r-body" className={labelClass}>What was it actually like</label>
-          <textarea
-            id="r-body"
-            rows="6"
-            placeholder="What the work was, what surprised you, what you would tell yourself before registering"
-            className={inputClass(errorFor("body"))}
-            aria-invalid={Boolean(errorFor("body"))}
-            aria-describedby="r-body-msg"
-            value={form.body}
-            onChange={(e) => updateField("body", e.target.value)}
-          />
-          <FieldMessage
-            id="r-body-msg"
-            error={errorFor("body")}
-            help="Minimum 40 characters. Say something a reader could act on."
-          />
-        </div>
+        <TextField
+          id="r-body"
+          label="What was it actually like"
+          multiline
+          rows="6"
+          placeholder="What the work was, what surprised you, what you would tell yourself before registering"
+          value={form.body}
+          onChange={(value) => updateField("body", value)}
+          error={shownErrors.body}
+          help="Minimum 40 characters. Say something a reader could act on."
+        />
 
         <label className="flex cursor-pointer items-start gap-3 rounded-card border border-line bg-brand-50/50 p-4">
           <input
