@@ -5,7 +5,7 @@ import WriteReview from "./pages/WriteReview";
 import MyReviews from "./pages/MyReviews";
 import NotFound from "./pages/NotFound";
 
-import LoginForm from "./components/authcomponents/LoginForm";
+import SignInForm from "./components/authcomponents/SignInForm";
 
 export default function App() {
   return (
@@ -16,7 +16,7 @@ export default function App() {
         <Route path="/reviews/new" element={<WriteReview />} />
         <Route path="/me/reviews" element={<MyReviews />} />
         <Route path="*" element={<NotFound />} />
-        <Route path="/signin" element={<LoginForm />} />
+        <Route path="/signin" element={<SignInForm />} />
       </Route>
 
     </Routes>
