@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import WriteReview from "./pages/WriteReview";
 import MyReviews from "./pages/MyReviews";
 import NotFound from "./pages/NotFound";
+import CourseDetail from "./pages/CourseDetail";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/reviews/new" element={<WriteReview />} />
         <Route path="/me/reviews" element={<MyReviews />} />
         <Route path="*" element={<NotFound />} />
+        <Route path="/courses/:courseId" element={<CourseDetail />} />
       </Route>
     </Routes>
   );
