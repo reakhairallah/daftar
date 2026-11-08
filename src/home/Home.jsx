@@ -1,10 +1,36 @@
 import { Link } from "react-router-dom";
 import RatingSummary from "../components/RatingSummary";
 import { useState } from "react";
-import { initialReviews } from "./homeData";
+import { homeReviews, courses } from "./homeData";
+import CourseCard from "../components/CourseCard";
 export default function Home() {
-    const [reviews] = useState(initialReviews);
+    const [reviews] = useState(homeReviews);
+    const termReviews = reviews.filter(
+  (review) => review.termId === "fall-2026"
+);
+
+const featuredReviews = termReviews.filter(
+  (review) => review.courseCode === "CSC443"
+);
+
+const highestRated = courses
+  .map((course) => {
+    const matching = termReviews.filter(
+      (review) => review.courseCode === course.code
+    );
+
+    const rating = matching.length
+      ? matching.reduce((sum, review) => sum + review.rating, 0) /
+        matching.length
+      : null;
+
+    return { ...course, rating };
+  })
+  .filter((course) => course.rating !== null)
+  .sort((a, b) => b.rating - a.rating)
+  .slice(0, 3);
   return (
+    <>
     <section className="grid items-start gap-10 lg:grid-cols-[1.15fr_1fr]">
   <div>
       <p className="text-[11px] font-semibold uppercase tracking-[0.13em] text-muted">
@@ -39,7 +65,24 @@ export default function Home() {
 </div>
   </div>
 
-  <RatingSummary reviews={reviews}/>
+  <RatingSummary reviews={featuredReviews}/>
 </section>
+<section className="mt-16">
+  <h2 className="font-display text-2xl font-semibold tracking-tight">
+    Highest rated this term
+  </h2>
+
+  <ul className="mt-5 space-y-3">
+  {highestRated.map((course) => (
+    <CourseCard
+      key={course.code}
+      course={course}
+      reviews={termReviews}
+    />
+  ))}
+</ul>
+   
+</section>
+</>
   );
 }
