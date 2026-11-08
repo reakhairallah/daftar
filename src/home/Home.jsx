@@ -1,7 +1,12 @@
 import { Link } from "react-router-dom";
+import RatingSummary from "../components/RatingSummary";
+import { useState } from "react";
+import { initialReviews } from "./homeData";
 export default function Home() {
+    const [reviews] = useState(initialReviews);
   return (
-    <section>
+    <section className="grid items-start gap-10 lg:grid-cols-[1.15fr_1fr]">
+  <div>
       <p className="text-[11px] font-semibold uppercase tracking-[0.13em] text-muted">
         Registration opens 16 November
       </p>
@@ -30,8 +35,11 @@ export default function Home() {
     className="inline-flex items-center justify-center rounded border border-line bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-brand-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700"
   >
     Write a review
-  </Link>
+   </Link>
 </div>
-    </section>
+  </div>
+
+  <RatingSummary reviews={reviews}/>
+</section>
   );
 }
