@@ -1,10 +1,19 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import DataState from "../components/DataState";
 import RatingSummary from "../components/RatingSummary";
 import { useState } from "react";
 import { homeReviews, courses } from "./homeData";
 import CourseCard from "../components/CourseCard";
 export default function Home() {
     const [reviews] = useState(homeReviews);
+    const [params, setParams] = useSearchParams();
+const viewState = params.get("state") ?? "populated";
+
+function retry() {
+  const next = new URLSearchParams(params);
+  next.delete("state");
+  setParams(next, { replace: true });
+}
     const termReviews = reviews.filter(
   (review) => review.termId === "fall-2026"
 );
@@ -65,22 +74,45 @@ const highestRated = courses
 </div>
   </div>
 
-  <RatingSummary reviews={featuredReviews}/>
+  <DataState
+  state={viewState}
+  isEmpty={featuredReviews.length === 0}
+  onRetry={retry}
+  emptyTitle="Nobody has reviewed CSC443 yet"
+>
+  <RatingSummary reviews={featuredReviews} />
+</DataState>
 </section>
 <section className="mt-16">
+  <div className="flex items-end justify-between gap-4">
   <h2 className="font-display text-2xl font-semibold tracking-tight">
     Highest rated this term
   </h2>
 
+  <Link
+    to="/courses"
+    className="shrink-0 text-sm font-semibold text-brand-700 underline decoration-accent-400 decoration-2 underline-offset-4"
+  >
+    All courses
+  </Link>
+</div>
+<DataState
+  state={viewState}
+  isEmpty={highestRated.length === 0}
+  onRetry={retry}
+  emptyTitle="No reviewed courses this term"
+>
   <ul className="mt-5 space-y-3">
-  {highestRated.map((course) => (
-    <CourseCard
-      key={course.code}
-      course={course}
-      reviews={termReviews}
-    />
-  ))}
-</ul>
+    {highestRated.map((course) => (
+      <CourseCard
+        key={course.code}
+        course={course}
+        reviews={termReviews}
+      />
+    ))}
+  </ul>
+</DataState>
+  
    
 </section>
 <section className="mt-16 grid gap-6 sm:grid-cols-3">
