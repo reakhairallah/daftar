@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 const meterColors = [
   "bg-brand-300",
   "bg-brand-400",
@@ -33,8 +34,13 @@ export default function CourseCard({ course, reviews }) {
             {course.code}
           </span>
           <h3 className="font-display text-lg font-semibold tracking-tight">
-            {course.title}
-          </h3>
+  <Link
+    to={`/courses/${course.code}`}
+    className="hover:underline"
+  >
+    {course.title}
+  </Link>
+</h3>
         </div>
         <p className="mt-0.5 text-xs text-muted">
           {course.department}

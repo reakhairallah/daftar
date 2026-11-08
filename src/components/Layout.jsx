@@ -10,11 +10,14 @@ export default function Layout() {
   return (
     <>
       <header className="border-b border-line bg-paper">
-        <div className="mx-auto flex max-w-6xl items-end gap-7 px-4 pb-3 pt-4">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-7 gap-y-3 px-4 pb-3 pt-4">
           <Link to="/" className="font-display text-2xl font-semibold tracking-tight text-ink">
             Daftar
           </Link>
-          <nav className="flex gap-6">
+          <nav className="flex flex-wrap gap-6" aria-label="Main navigation">
+            <NavLink to="/courses" className={navClass}>
+  Courses
+</NavLink>
             <NavLink to="/me/reviews" className={navClass}>My reviews</NavLink>
             <NavLink to="/reviews/new" className={navClass}>Write a review</NavLink>
           </nav>
