@@ -102,18 +102,25 @@ const highestRated = courses
       You may hide your name from readers. Your review still belongs
       to you and you can still manage it.
     </p>
-  </div>
 
-  <div className="rounded-card border border-line bg-surface p-6">
-    <h3 className="font-display text-lg font-semibold tracking-tight">
-      Averages are computed
-    </h3>
-    <p className="mt-1.5 text-sm text-muted">
-      Delete a review and the mean changes immediately.
-      Nothing is cached into a column.
-    </p>
   </div>
+<div className="rounded-card border border-line bg-surface p-6">
+  <h3 className="font-display text-lg font-semibold tracking-tight">
+    Averages are computed
+  </h3>
+  <p className="mt-1.5 text-sm text-muted">
+    Delete a review and the mean changes immediately.
+    Nothing is cached into a column.
+  </p>
+</div>
+  
 </section>
+
+
+  
+
+ 
+
 </>
   );
 }
