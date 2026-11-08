@@ -83,6 +83,37 @@ const highestRated = courses
 </ul>
    
 </section>
+<section className="mt-16 grid gap-6 sm:grid-cols-3">
+  <div className="rounded-card border border-line bg-surface p-6">
+    <h3 className="font-display text-lg font-semibold tracking-tight">
+      One review each
+    </h3>
+    <p className="mt-1.5 text-sm text-muted">
+      Per course, per instructor, per term. You can edit yours;
+      you cannot post a second.
+    </p>
+  </div>
+
+  <div className="rounded-card border border-line bg-surface p-6">
+    <h3 className="font-display text-lg font-semibold tracking-tight">
+      Anonymous is not nameless
+    </h3>
+    <p className="mt-1.5 text-sm text-muted">
+      You may hide your name from readers. Your review still belongs
+      to you and you can still manage it.
+    </p>
+  </div>
+
+  <div className="rounded-card border border-line bg-surface p-6">
+    <h3 className="font-display text-lg font-semibold tracking-tight">
+      Averages are computed
+    </h3>
+    <p className="mt-1.5 text-sm text-muted">
+      Delete a review and the mean changes immediately.
+      Nothing is cached into a column.
+    </p>
+  </div>
+</section>
 </>
   );
 }
