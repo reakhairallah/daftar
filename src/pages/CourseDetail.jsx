@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import ReviewList from "../components/ReviewList";
 
 // Temporary course data from the design reference.
@@ -18,12 +18,47 @@ const sampleInstructor = {
 
 export default function CourseDetail() {
   const { courseId } = useParams();
-
+  const [searchParams] = useSearchParams();
+  const pageState = searchParams.get("state");
   // Temporary lookup until shared data is available.
   const course = courseId === sampleCourse.code ? sampleCourse : null;
 
+  if (pageState === "loading") {
+    return (
+      <div role="status" className="py-16 text-center">
+        <p className="text-lg font-semibold text-ink">Loading course...</p>
+        <p className="mt-2 text-sm text-muted">
+          Getting the course information and reviews.
+        </p>
+      </div>
+    );
+  }
+
+  if (pageState === "error") {
+    return (
+      <div
+        role="alert"
+        className="rounded-card border border-line bg-surface p-6"
+      >
+        <h1 className="font-display text-2xl font-semibold text-ink">
+          Something went wrong
+        </h1>
+        <p className="mt-2 text-sm text-muted">
+          We couldn't load the course information. Please try again.
+        </p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="mt-4 rounded bg-brand-700 px-4 py-2 text-sm font-semibold text-white"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
   if (!course) {
-    return <p>Course not found.</p>;
+    return <p role="status">Course not found.</p>;
   }
 
   return (
@@ -158,7 +193,26 @@ export default function CourseDetail() {
           </div>
         </div>
       </section>
-      <ReviewList />
+
+      {pageState === "empty" ? (
+        <section className="mt-10 rounded-card border border-line bg-surface p-8 text-center">
+          <h2 className="font-display text-2xl font-semibold text-ink">
+            No reviews yet
+          </h2>
+          <p className="mt-2 text-sm text-muted">
+            This course hasn't received any reviews. Be the first to share your
+            experience.
+          </p>
+          <Link
+            to="/reviews/new"
+            className="mt-5 inline-block rounded bg-brand-700 px-4 py-2 text-sm font-semibold text-white"
+          >
+            Write a review
+          </Link>
+        </section>
+      ) : (
+        <ReviewList />
+      )}
     </>
   );
 }
