@@ -8,7 +8,7 @@ Daftar collects what a course was actually like — with a named instructor, in 
 
 | File | Surface | Owner |
 |---|---|---|
-| `01-home.html` | Home — the pitch, a live summary, the highest rated | Cloey |
+| `01-home.html` → `src/home/Home.jsx` | Home — the pitch, a live summary, the highest rated | Cloey |
 | `02-courses.html` | Courses — search and filters, four data states | Cloey |
 | `03-course.html` | Course detail — the summary, the reviews, three viewer variants | Nelly |
 | `04-instructor.html` | Instructor — their courses, and the honest way to average them | Nelly |
@@ -33,7 +33,7 @@ Daftar collects what a course was actually like — with a named instructor, in 
 
 ## Getting started
 
-Requires Node.js 18 or later.
+Requires Node.js 20.19+ or 22.12+ (Vite's supported runtime ranges).
 
 ```bash
 git clone https://github.com/reakhairallah/daftar.git
@@ -109,7 +109,7 @@ export default {
 
 ### Fonts
 
-The design pack embeds Newsreader and Libre Franklin inside `styles.css`. We load them separately: _(choose one — Google Fonts link in `index.html`, or self-hosted files in `src/assets/fonts/`)_.
+The supplied Newsreader and Libre Franklin font faces are embedded in `src/assets/fonts.css`, imported by `src/index.css`. They load locally and do not depend on Google Fonts or an internet connection.
 
 ---
 
@@ -130,3 +130,15 @@ src/
 ## Data model
 
 In short: we store `User`, `Course`, `Instructor` and `Review`. Every average, count and percentage (`CourseSummary`) is computed from the reviews that currently exist. Nothing is cached.
+
+---
+
+## Home implementation
+
+Reference: `CSC443-F26 · T05 · rev A`. Home's React source is `src/home/Home.jsx`. Shared fixture data lives in `src/data/mockData.js`; the single shared in-memory provider is `src/state/AppProvider.jsx`. No localStorage or backend is used. Other surfaces should use `useAppData()` from `src/state/AppContext.js` so review changes update Home's summaries too.
+
+The Home route supports `?state=loading`, `?state=empty`, and `?state=error`. Try again removes only the state parameter. Home includes the populated rating summary, a calculated top three for Fall 2026, the three review-policy cards, and shared navigation/footer.
+
+Run `npm run test:home` and `npm run build` to check it. The header uses the seeded current user and derives their initials from their name; a null current user renders the signed-out variant.
+
+See [Home implementation and route handoff](docs/home.md) for file ownership, data flow, test URLs, and integration details. Courses, course detail, instructor, and sign-in destinations still need their owners' route elements merged; their links are not proof that those surfaces are complete. Full team submission details (student IDs, live URL, remaining file mappings) still need to be supplied by the team.
