@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 // TEMP: stand-in for Cloey's useAppData() until her code is in this branch.
 // Swap: change the import to "../state/AppContext" in each page, then delete this file.
 const courses = [
@@ -14,7 +16,7 @@ const terms = [
   { id: "summer-2026", season: "Summer", year: 2026 },
   { id: "spring-2026", season: "Spring", year: 2026 },
 ];
-const reviews = [
+const initialReviews = [
   {
     id: "r1", authorId: "u1", courseCode: "CSC443", instructorId: "abdelnour", termId: "fall-2026",
     rating: 5, difficulty: 3, hoursPerWeek: 7, wouldTakeAgain: true, anonymous: false,
@@ -36,10 +38,7 @@ const reviews = [
 ];
 const currentUser = { id: "u1", fullName: "Rea Khairallah" };
 
-function setReviews(newList) {
-  console.log("TEMP saved:", newList);
-}
-
 export function useAppData() {
+  const [reviews, setReviews] = useState(initialReviews);
   return { courses, instructors, terms, reviews, setReviews, currentUser };
 }

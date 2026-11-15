@@ -1,8 +1,11 @@
+import { Link } from "react-router-dom";
 import StarRating from "../StarRating";
 import Badge from "../Badge";
 import { initials } from "../../lib/reviewLabels";
 
-export default function ReviewCard({ review, authorName, instructorName, termLabel }) {
+const actionClass = "rounded px-3 py-1.5 text-xs font-semibold text-muted hover:bg-brand-50 hover:text-ink";
+
+export default function ReviewCard({ review, authorName, instructorName, termLabel, onDelete }) {
   const shownName = review.anonymous ? "Anonymous" : authorName;
   const avatar = review.anonymous ? "••" : initials(authorName);
 
@@ -20,7 +23,14 @@ export default function ReviewCard({ review, authorName, instructorName, termLab
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="font-display text-base font-semibold tracking-tight text-ink">{shownName}</span>
             <span className="text-xs text-muted">
-              {review.courseCode} · {instructorName} · {termLabel}
+              <Link to={`/courses/${review.courseCode}`} className="underline-offset-2 hover:text-ink hover:underline">
+                {review.courseCode}
+              </Link>
+              {" · "}
+              <Link to={`/instructors/${review.instructorId}`} className="underline-offset-2 hover:text-ink hover:underline">
+                {instructorName}
+              </Link>
+              {` · ${termLabel}`}
             </span>
             <Badge tone="dark">Yours</Badge>
             {review.anonymous && <Badge>Posted anonymously</Badge>}
@@ -38,6 +48,15 @@ export default function ReviewCard({ review, authorName, instructorName, termLab
           </div>
 
           <p className="mt-3 text-sm leading-relaxed text-ink/85">{review.body}</p>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <Link to={`/reviews/${review.id}/edit`} className={actionClass} aria-label={`Edit your ${review.courseCode} review`}>
+            Edit
+          </Link>
+          <button type="button" onClick={onDelete} className={actionClass} aria-label={`Delete your ${review.courseCode} review`}>
+            Delete
+          </button>
         </div>
       </div>
     </li>

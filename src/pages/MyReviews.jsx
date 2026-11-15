@@ -3,8 +3,13 @@ import { useAppData } from "../lib/tempAppData";
 import { termLabel, instructorLastName } from "../lib/reviewLabels";
 
 export default function MyReviews() {
-  const { reviews, instructors, terms, currentUser } = useAppData();
+  const { reviews, setReviews, instructors, terms, currentUser } = useAppData();
   const myReviews = reviews.filter((review) => review.authorId === currentUser.id);
+
+  function deleteReview(review) {
+    if (!window.confirm(`Delete your ${review.courseCode} review? This cannot be undone.`)) return;
+    setReviews(reviews.filter((r) => r.id !== review.id));
+  }
 
   return (
     <>
@@ -21,6 +26,7 @@ export default function MyReviews() {
             authorName={currentUser.fullName}
             instructorName={instructorLastName(instructors, review.instructorId)}
             termLabel={termLabel(terms, review.termId)}
+            onDelete={() => deleteReview(review)}
           />
         ))}
       </ul>
