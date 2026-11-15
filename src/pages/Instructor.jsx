@@ -1,6 +1,7 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import { calculateRatingSummary } from "../utils/ratingUtils";
 
-// Temporary instructor data from the design reference
+// Temporary data for Phase 1
 const sampleInstructor = {
   id: "abdelnour",
   name: "Nagib Abdelnour",
@@ -12,47 +13,92 @@ const sampleCourses = [
     code: "CSC443",
     title: "Web Programming",
     term: "Fall 2026",
-    reviewCount: 38,
-    rating: 4.2,
-    difficulty: 3,
-    hoursPerWeek: 7,
-    takeAgain: 89,
   },
   {
     code: "CSC245",
     title: "Object-Oriented Programming",
     term: "Spring 2026",
-    reviewCount: 8,
-    rating: 4.3,
-    difficulty: 3,
-    hoursPerWeek: 6,
-    takeAgain: 91,
   },
 ];
 
-const ratingDistribution = [
-  { stars: 5, count: 22 },
-  { stars: 4, count: 16 },
-  { stars: 3, count: 5 },
-  { stars: 2, count: 2 },
-  { stars: 1, count: 1 },
+const sampleReviews = [
+  {
+    id: "r1",
+    authorId: "u1",
+    courseCode: "CSC443",
+    instructorId: "abdelnour",
+    termId: "fall-2026",
+    rating: 5,
+    difficulty: 3,
+    hoursPerWeek: 7,
+    wouldTakeAgain: true,
+    body: "The course was interesting and the projects were useful.",
+    anonymous: false,
+  },
+  {
+    id: "r2",
+    authorId: "u2",
+    courseCode: "CSC443",
+    instructorId: "abdelnour",
+    termId: "spring-2026",
+    rating: 4,
+    difficulty: 4,
+    hoursPerWeek: 8,
+    wouldTakeAgain: true,
+    body: "Good explanations, but some assignments took a lot of time.",
+    anonymous: true,
+  },
+  {
+    id: "r3",
+    authorId: "u3",
+    courseCode: "CSC245",
+    instructorId: "abdelnour",
+    termId: "spring-2026",
+    rating: 3,
+    difficulty: 3,
+    hoursPerWeek: 6,
+    wouldTakeAgain: false,
+    body: "The lectures were helpful, although the exams were challenging.",
+    anonymous: false,
+  },
 ];
-
-const maxRatingCount = Math.max(
-  ...ratingDistribution.map((item) => item.count),
-);
-
-const totalReviews = ratingDistribution.reduce(
-  (total, item) => total + item.count,
-  0,
-);
 
 export default function Instructor() {
   const { instructorId } = useParams();
   const [searchParams] = useSearchParams();
   const pageState = searchParams.get("state");
+
   const instructor =
     instructorId === sampleInstructor.id ? sampleInstructor : null;
+
+  const instructorReviews = sampleReviews.filter(
+    (review) => review.instructorId === instructorId,
+  );
+
+  const visibleReviews = pageState === "empty" ? [] : instructorReviews;
+
+  const summary = calculateRatingSummary(visibleReviews);
+
+  const coursesWithRatings = sampleCourses.map((course) => {
+    const courseReviews = visibleReviews.filter(
+      (review) => review.courseCode === course.code,
+    );
+
+    return {
+      ...course,
+      summary: calculateRatingSummary(courseReviews),
+    };
+  });
+
+  const ratingDistribution = [5, 4, 3, 2, 1].map((stars) => ({
+    stars,
+    count: summary.distribution[stars - 1],
+  }));
+
+  const maxRatingCount = Math.max(
+    1,
+    ...ratingDistribution.map((item) => item.count),
+  );
 
   if (pageState === "loading") {
     return (
@@ -114,17 +160,18 @@ export default function Instructor() {
           NA
         </div>
 
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <h1 className="font-display text-4xl font-semibold tracking-tight text-ink">
             {instructor.name}
           </h1>
 
           <p className="mt-2 text-sm text-muted">
-            {instructor.department} · 2 courses · 46 reviews
+            {instructor.department} · {sampleCourses.length} courses ·{" "}
+            {summary.count} reviews
           </p>
         </div>
 
-        {/* Overall instructor rating */}
+        {/* Overall rating */}
         <div className="text-left sm:text-right">
           <p className="text-[11px] font-semibold uppercase tracking-[0.13em] text-muted">
             Across all courses
@@ -132,20 +179,30 @@ export default function Instructor() {
 
           <div className="mt-1 flex items-end gap-2 sm:justify-end">
             <span className="font-display text-4xl font-semibold tracking-tight text-ink">
-              4.3
+              {summary.count ? summary.averageRating.toFixed(1) : "—"}
             </span>
 
-            <span className="pb-1 text-lg text-amber-500">★★★★☆</span>
+            {summary.count > 0 && (
+              <span className="pb-1 text-lg text-amber-500">
+                {"★".repeat(Math.round(summary.averageRating))}
+                {"☆".repeat(5 - Math.round(summary.averageRating))}
+              </span>
+            )}
           </div>
 
-          <p className="mt-1 text-xs text-muted">Based on 46 student reviews</p>
+          <p className="mt-1 text-xs text-muted">
+            Based on {summary.count} student reviews
+          </p>
         </div>
       </section>
+
+      {/* Empty state */}
       {pageState === "empty" ? (
         <section className="mt-8 rounded-card border border-line bg-surface p-8 text-center">
           <h2 className="font-display text-2xl font-semibold text-ink">
             No reviews yet
           </h2>
+
           <p className="mt-2 text-sm text-muted">
             This instructor hasn't received any reviews yet.
           </p>
@@ -159,7 +216,7 @@ export default function Instructor() {
             </h2>
 
             <ul className="mt-4 space-y-3">
-              {sampleCourses.map((course) => (
+              {coursesWithRatings.map((course) => (
                 <li
                   key={course.code}
                   className="rounded-card border border-line bg-surface px-5 py-4 hover:border-brand-300"
@@ -178,7 +235,7 @@ export default function Instructor() {
                       </Link>
 
                       <p className="mt-1 text-xs text-muted">
-                        {course.term} · {course.reviewCount} reviews
+                        {course.term} · {course.summary.count} reviews
                       </p>
                     </div>
 
@@ -188,7 +245,9 @@ export default function Instructor() {
                           Rating
                         </p>
                         <p className="font-semibold text-ink">
-                          {course.rating}/5
+                          {course.summary.count
+                            ? `${course.summary.averageRating.toFixed(1)}/5`
+                            : "—"}
                         </p>
                       </div>
 
@@ -197,7 +256,9 @@ export default function Instructor() {
                           Difficulty
                         </p>
                         <p className="font-semibold text-ink">
-                          {course.difficulty}/5
+                          {course.summary.count
+                            ? `${course.summary.averageDifficulty.toFixed(1)}/5`
+                            : "—"}
                         </p>
                       </div>
 
@@ -206,7 +267,9 @@ export default function Instructor() {
                           Hours/wk
                         </p>
                         <p className="font-semibold text-ink">
-                          {course.hoursPerWeek}
+                          {course.summary.count
+                            ? course.summary.averageHours.toFixed(1)
+                            : "—"}
                         </p>
                       </div>
 
@@ -215,7 +278,9 @@ export default function Instructor() {
                           Again
                         </p>
                         <p className="font-semibold text-ink">
-                          {course.takeAgain}%
+                          {course.summary.count
+                            ? `${Math.round(course.summary.takeAgainPercent)}%`
+                            : "—"}
                         </p>
                       </div>
                     </div>
@@ -225,7 +290,7 @@ export default function Instructor() {
             </ul>
           </section>
 
-          {/* All instructor ratings */}
+          {/* Rating distribution */}
           <section className="mt-10 rounded-card border border-line bg-surface p-6">
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.13em] text-muted">
               All reviews of this instructor
@@ -233,7 +298,7 @@ export default function Instructor() {
 
             <div className="mt-4 max-w-md">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.13em] text-muted">
-                Ratings given · {totalReviews} in total
+                Ratings given · {summary.count} in total
               </p>
 
               <div className="flex flex-col gap-2">
@@ -247,11 +312,7 @@ export default function Instructor() {
                       <div
                         className="h-full rounded bg-brand-600"
                         style={{
-                          width: `${
-                            maxRatingCount > 0
-                              ? (count / maxRatingCount) * 100
-                              : 0
-                          }%`,
+                          width: `${(count / maxRatingCount) * 100}%`,
                         }}
                       />
                     </div>
