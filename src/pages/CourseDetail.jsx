@@ -1,82 +1,11 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { calculateRatingSummary } from "../utils/ratingUtils";
 import ReviewList from "../components/ReviewList";
-
-// Temporary Phase 1 data
-const sampleCourses = [
-  {
-    code: "CSC443",
-    title: "Web Programming",
-    department: "Computer Science",
-    credits: 3,
-    coRequisite: "CSC375",
-  },
-  {
-    code: "CSC245",
-    title: "Object-Oriented Programming",
-    department: "Computer Science",
-    credits: 3,
-    coRequisite: null,
-  },
-];
-
-const sampleInstructors = [
-  {
-    id: "abdelnour",
-    name: "Nagib Abdelnour",
-  },
-];
-
-const sampleReviews = [
-  {
-    id: "r1",
-    authorId: "u1",
-    authorName: "Rea Khairallah",
-    courseCode: "CSC443",
-    instructorId: "abdelnour",
-    instructorName: "Abdelnour",
-    termId: "fall-2026",
-    termName: "Fall 2026",
-    rating: 5,
-    difficulty: 3,
-    hoursPerWeek: 7,
-    wouldTakeAgain: true,
-    anonymous: false,
-    body: "The course was interesting and the projects were useful.",
-  },
-  {
-    id: "r2",
-    authorId: "u2",
-    authorName: "Student",
-    courseCode: "CSC443",
-    instructorId: "abdelnour",
-    instructorName: "Abdelnour",
-    termId: "spring-2026",
-    termName: "Spring 2026",
-    rating: 4,
-    difficulty: 4,
-    hoursPerWeek: 8,
-    wouldTakeAgain: true,
-    anonymous: true,
-    body: "Good explanations, but some assignments took a lot of time.",
-  },
-  {
-    id: "r3",
-    authorId: "u3",
-    authorName: "Student",
-    courseCode: "CSC245",
-    instructorId: "abdelnour",
-    instructorName: "Abdelnour",
-    termId: "spring-2026",
-    termName: "Spring 2026",
-    rating: 3,
-    difficulty: 3,
-    hoursPerWeek: 6,
-    wouldTakeAgain: false,
-    anonymous: false,
-    body: "The lectures were helpful, although the exams were challenging.",
-  },
-];
+import {
+  sampleCourses,
+  sampleInstructors,
+  sampleReviews,
+} from "../data/sampleData";
 
 export default function CourseDetail() {
   const { courseId } = useParams();

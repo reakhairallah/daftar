@@ -1,75 +1,17 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { calculateRatingSummary } from "../utils/ratingUtils";
-
-// Temporary data for Phase 1
-const sampleInstructor = {
-  id: "abdelnour",
-  name: "Nagib Abdelnour",
-  department: "Computer Science",
-};
-
-const sampleCourses = [
-  {
-    code: "CSC443",
-    title: "Web Programming",
-    term: "Fall 2026",
-  },
-  {
-    code: "CSC245",
-    title: "Object-Oriented Programming",
-    term: "Spring 2026",
-  },
-];
-
-const sampleReviews = [
-  {
-    id: "r1",
-    authorId: "u1",
-    courseCode: "CSC443",
-    instructorId: "abdelnour",
-    termId: "fall-2026",
-    rating: 5,
-    difficulty: 3,
-    hoursPerWeek: 7,
-    wouldTakeAgain: true,
-    body: "The course was interesting and the projects were useful.",
-    anonymous: false,
-  },
-  {
-    id: "r2",
-    authorId: "u2",
-    courseCode: "CSC443",
-    instructorId: "abdelnour",
-    termId: "spring-2026",
-    rating: 4,
-    difficulty: 4,
-    hoursPerWeek: 8,
-    wouldTakeAgain: true,
-    body: "Good explanations, but some assignments took a lot of time.",
-    anonymous: true,
-  },
-  {
-    id: "r3",
-    authorId: "u3",
-    courseCode: "CSC245",
-    instructorId: "abdelnour",
-    termId: "spring-2026",
-    rating: 3,
-    difficulty: 3,
-    hoursPerWeek: 6,
-    wouldTakeAgain: false,
-    body: "The lectures were helpful, although the exams were challenging.",
-    anonymous: false,
-  },
-];
+import {
+  sampleCourses,
+  sampleInstructors,
+  sampleReviews,
+} from "../data/sampleData";
 
 export default function Instructor() {
   const { instructorId } = useParams();
   const [searchParams] = useSearchParams();
   const pageState = searchParams.get("state");
 
-  const instructor =
-    instructorId === sampleInstructor.id ? sampleInstructor : null;
+  const instructor = sampleInstructors.find((item) => item.id === instructorId);
 
   const instructorReviews = sampleReviews.filter(
     (review) => review.instructorId === instructorId,
@@ -79,16 +21,20 @@ export default function Instructor() {
 
   const summary = calculateRatingSummary(visibleReviews);
 
-  const coursesWithRatings = sampleCourses.map((course) => {
-    const courseReviews = visibleReviews.filter(
-      (review) => review.courseCode === course.code,
-    );
+  const coursesWithRatings = sampleCourses
+    .filter((course) =>
+      instructorReviews.some((review) => review.courseCode === course.code),
+    )
+    .map((course) => {
+      const courseReviews = visibleReviews.filter(
+        (review) => review.courseCode === course.code,
+      );
 
-    return {
-      ...course,
-      summary: calculateRatingSummary(courseReviews),
-    };
-  });
+      return {
+        ...course,
+        summary: calculateRatingSummary(courseReviews),
+      };
+    });
 
   const ratingDistribution = [5, 4, 3, 2, 1].map((stars) => ({
     stars,
@@ -103,7 +49,9 @@ export default function Instructor() {
   if (pageState === "loading") {
     return (
       <div role="status" className="py-16 text-center">
-        <p className="text-lg font-semibold text-ink">Loading instructor...</p>
+        <h1 className="font-display text-2xl font-semibold text-ink">
+          Loading instructor...
+        </h1>
         <p className="mt-2 text-sm text-muted">
           Getting instructor information and reviews.
         </p>
@@ -113,7 +61,7 @@ export default function Instructor() {
 
   if (pageState === "error") {
     return (
-      <div
+      <section
         role="alert"
         className="rounded-card border border-line bg-surface p-6"
       >
@@ -131,13 +79,30 @@ export default function Instructor() {
         >
           Try again
         </Link>
-      </div>
+      </section>
     );
   }
 
   if (!instructor) {
-    return <p role="status">Instructor not found.</p>;
+    return (
+      <div className="py-10">
+        <h1 className="font-display text-2xl font-semibold text-ink">
+          Instructor not found
+        </h1>
+
+        <p className="mt-2 text-sm text-muted">
+          We couldn't find the instructor you're looking for.
+        </p>
+      </div>
+    );
   }
+
+  const initials = instructor.name
+    .split(" ")
+    .map((name) => name[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <>
@@ -146,8 +111,8 @@ export default function Instructor() {
         className="text-[11px] font-semibold uppercase tracking-[0.13em] text-muted"
         aria-label="Breadcrumb"
       >
-        <Link to="/instructors" className="hover:text-ink">
-          Instructors
+        <Link to="/courses" className="hover:text-ink">
+          Courses
         </Link>
 
         <span className="mx-2 text-brand-500">/</span>
@@ -156,8 +121,8 @@ export default function Instructor() {
 
       {/* Instructor information */}
       <section className="mt-4 flex flex-wrap items-end gap-6">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-50 font-display text-2xl font-semibold text-brand-700">
-          NA
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-brand-50 font-display text-2xl font-semibold text-brand-700">
+          {initials}
         </div>
 
         <div className="min-w-0 flex-1">
@@ -166,12 +131,12 @@ export default function Instructor() {
           </h1>
 
           <p className="mt-2 text-sm text-muted">
-            {instructor.department} · {sampleCourses.length} courses ·{" "}
+            {instructor.department} · {coursesWithRatings.length} courses ·{" "}
             {summary.count} reviews
           </p>
         </div>
 
-        {/* Overall rating */}
+        {/* Overall instructor rating */}
         <div className="text-left sm:text-right">
           <p className="text-[11px] font-semibold uppercase tracking-[0.13em] text-muted">
             Across all courses
@@ -179,11 +144,14 @@ export default function Instructor() {
 
           <div className="mt-1 flex items-end gap-2 sm:justify-end">
             <span className="font-display text-4xl font-semibold tracking-tight text-ink">
-              {summary.count ? summary.averageRating.toFixed(1) : "—"}
+              {summary.count > 0 ? summary.averageRating.toFixed(1) : "—"}
             </span>
 
             {summary.count > 0 && (
-              <span className="pb-1 text-lg text-amber-500">
+              <span
+                className="pb-1 text-lg text-amber-500"
+                aria-label={`${summary.averageRating.toFixed(1)} out of 5 stars`}
+              >
                 {"★".repeat(Math.round(summary.averageRating))}
                 {"☆".repeat(5 - Math.round(summary.averageRating))}
               </span>
@@ -197,7 +165,7 @@ export default function Instructor() {
       </section>
 
       {/* Empty state */}
-      {pageState === "empty" ? (
+      {pageState === "empty" || summary.count === 0 ? (
         <section className="mt-8 rounded-card border border-line bg-surface p-8 text-center">
           <h2 className="font-display text-2xl font-semibold text-ink">
             No reviews yet
@@ -244,6 +212,7 @@ export default function Instructor() {
                         <p className="text-[11px] uppercase text-muted">
                           Rating
                         </p>
+
                         <p className="font-semibold text-ink">
                           {course.summary.count
                             ? `${course.summary.averageRating.toFixed(1)}/5`
@@ -255,6 +224,7 @@ export default function Instructor() {
                         <p className="text-[11px] uppercase text-muted">
                           Difficulty
                         </p>
+
                         <p className="font-semibold text-ink">
                           {course.summary.count
                             ? `${course.summary.averageDifficulty.toFixed(1)}/5`
@@ -266,6 +236,7 @@ export default function Instructor() {
                         <p className="text-[11px] uppercase text-muted">
                           Hours/wk
                         </p>
+
                         <p className="font-semibold text-ink">
                           {course.summary.count
                             ? course.summary.averageHours.toFixed(1)
@@ -277,6 +248,7 @@ export default function Instructor() {
                         <p className="text-[11px] uppercase text-muted">
                           Again
                         </p>
+
                         <p className="font-semibold text-ink">
                           {course.summary.count
                             ? `${Math.round(course.summary.takeAgainPercent)}%`
