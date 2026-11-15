@@ -4,7 +4,7 @@ import Home from "./pages/Home";
 import WriteReview from "./pages/WriteReview";
 import MyReviews from "./pages/MyReviews";
 import NotFound from "./pages/NotFound";
-
+import Instructor from "./pages/Instructor";
 export default function App() {
   return (
     <Routes>
@@ -14,6 +14,7 @@ export default function App() {
         <Route path="/reviews/new" element={<WriteReview />} />
         <Route path="/me/reviews" element={<MyReviews />} />
         <Route path="*" element={<NotFound />} />
+        <Route path="/instructors/:instructorId" element={<Instructor />} />
       </Route>
     </Routes>
   );
