@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import SelectField from "../components/write-review/SelectField";
 import TextField from "../components/write-review/TextField";
@@ -10,6 +10,7 @@ import EditRefused from "../components/write-review/EditRefused";
 import { labelClass } from "../components/write-review/fieldStyles";
 import { validateReview, MIN_BODY } from "../lib/validateReview";
 import { findExistingReview } from "../lib/findExistingReview";
+import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 // TEMP: same shape as Cloey's useAppData(). Replace with: const { courses, instructors, terms, reviews, setReviews, currentUser } = useAppData();
 const courses = [
@@ -84,10 +85,23 @@ function ReviewForm({ reviewId }) {
   const editingReview = reviews.find((review) => review.id === reviewId);
   const isEditing = Boolean(editingReview);
 
-  const [form, setForm] = useState(isEditing ? reviewToForm(editingReview) : emptyForm);
+  const initialForm = isEditing ? reviewToForm(editingReview) : emptyForm;
+
+  const [form, setForm] = useState(initialForm);
   const [touched, setTouched] = useState({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [saved, setSaved] = useState(false);
   const navigate = useNavigate();
+
+  const existingReview = findExistingReview(reviews, form, currentUser.id, editingReview?.id);
+  const existingReviewPath = existingReview && `/reviews/${existingReview.id}/edit`;
+
+  const hasUnsavedChanges = !saved && JSON.stringify(form) !== JSON.stringify(initialForm);
+  useUnsavedChangesWarning(hasUnsavedChanges, existingReviewPath);
+
+  useEffect(() => {
+    if (saved) navigate("/me/reviews");
+  }, [saved, navigate]);
 
   if (reviewId && !editingReview) {
     return <EditRefused title="This review does not exist" text="It may have been deleted, or the link is wrong." />;
@@ -104,8 +118,6 @@ function ReviewForm({ reviewId }) {
   }
 
   const shownErrorCount = Object.keys(shownErrors).length;
-
-  const existingReview = findExistingReview(reviews, form, currentUser.id, editingReview?.id);
 
   const courseOptions = courses.map((c) => ({ value: c.code, label: `${c.code} · ${c.title}` }));
   const instructorOptions = instructors.map((i) => ({ value: i.id, label: i.name }));
@@ -133,7 +145,7 @@ function ReviewForm({ reviewId }) {
       const newReview = { ...fields, id: crypto.randomUUID(), authorId: currentUser.id, createdAt: today, updatedAt: null };
       setReviews([...reviews, newReview]);
     }
-    navigate("/me/reviews");
+    setSaved(true);
   }
 
   return (
@@ -187,7 +199,7 @@ function ReviewForm({ reviewId }) {
         </div>
 
         {existingReview && (
-          <AlreadyReviewedNotice review={existingReview} instructors={instructors} terms={terms} />
+          <AlreadyReviewedNotice review={existingReview} editPath={existingReviewPath} instructors={instructors} terms={terms} />
         )}
 
         <fieldset

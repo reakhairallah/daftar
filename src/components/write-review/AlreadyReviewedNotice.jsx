@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export default function AlreadyReviewedNotice({ review, instructors, terms }) {
+export default function AlreadyReviewedNotice({ review, editPath, instructors, terms }) {
   const instructor = instructors.find((i) => i.id === review.instructorId);
   const term = terms.find((t) => t.id === review.termId);
   const lastName = instructor.name.split(" ").at(-1);
@@ -15,7 +15,7 @@ export default function AlreadyReviewedNotice({ review, instructors, terms }) {
         Posted {postedOn}, {review.rating} {review.rating === 1 ? "star" : "stars"}. You can change it as often as you like.
       </p>
       <Link
-        to={`/reviews/${review.id}/edit`}
+        to={editPath}
         className="mt-3 inline-flex rounded border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-brand-50"
       >
         Edit that review instead
