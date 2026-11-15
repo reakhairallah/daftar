@@ -7,6 +7,7 @@ import DifficultyMeter from "../components/DifficultyMeter";
 import FieldMessage from "../components/write-review/FieldMessage";
 import AlreadyReviewedNotice from "../components/write-review/AlreadyReviewedNotice";
 import EditRefused from "../components/write-review/EditRefused";
+import SignInRedirect from "../components/SignInRedirect";
 import { labelClass } from "../components/write-review/fieldStyles";
 import { validateReview, MIN_BODY } from "../lib/validateReview";
 import { findExistingReview } from "../lib/findExistingReview";
@@ -41,6 +42,9 @@ function reviewToForm(review) {
 
 export default function WriteReview() {
   const { reviewId } = useParams();
+  const { currentUser } = useAppData();
+
+  if (!currentUser) return <SignInRedirect />;
   return <ReviewForm key={reviewId ?? "new"} reviewId={reviewId} />;
 }
 

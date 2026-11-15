@@ -2,14 +2,18 @@ import { useSearchParams } from "react-router-dom";
 import ReviewCard from "../components/my-reviews/ReviewCard";
 import EmptyReviews from "../components/my-reviews/EmptyReviews";
 import DataState from "../components/TempDataState";
+import SignInRedirect from "../components/SignInRedirect";
 import { useAppData } from "../lib/tempAppData";
 import { termLabel, instructorLastName } from "../lib/reviewLabels";
 
 export default function MyReviews() {
   const { reviews, setReviews, instructors, terms, currentUser } = useAppData();
+  const [params, setParams] = useSearchParams();
+
+  if (!currentUser) return <SignInRedirect />;
+
   const myReviews = reviews.filter((review) => review.authorId === currentUser.id);
 
-  const [params, setParams] = useSearchParams();
   const requestedState = params.get("state");
   const viewState = ["loading", "empty", "error"].includes(requestedState) ? requestedState : "populated";
 
