@@ -5,12 +5,15 @@ import TextField from "../components/write-review/TextField";
 import StarRating from "../components/StarRating";
 import DifficultyMeter from "../components/DifficultyMeter";
 import FieldMessage from "../components/write-review/FieldMessage";
+import AlreadyReviewedNotice from "../components/write-review/AlreadyReviewedNotice";
 import { labelClass } from "../components/write-review/fieldStyles";
-import { validateReview, MIN_BODY } from "../utils/validateReview";
+import { validateReview, MIN_BODY } from "../lib/validateReview";
+import { findExistingReview } from "../lib/findExistingReview";
 
-// TEMP: hard-coded lists
+// TEMP: same shape as Cloey's useAppData(). Replace with: const { courses, instructors, terms, reviews, currentUser } = useAppData();
 const courses = [
   { code: "CSC443", title: "Web Programming" },
+  { code: "CSC310", title: "Algorithms" },
   { code: "CSC375", title: "Database Management" },
 ];
 const instructors = [
@@ -19,13 +22,15 @@ const instructors = [
 ];
 const terms = [
   { id: "fall-2026", season: "Fall", year: 2026 },
+  { id: "summer-2026", season: "Summer", year: 2026 },
   { id: "spring-2026", season: "Spring", year: 2026 },
-  { id: "fall-2025", season: "Fall", year: 2025 },
 ];
-
-const courseOptions = courses.map((c) => ({ value: c.code, label: `${c.code} · ${c.title}` }));
-const instructorOptions = instructors.map((i) => ({ value: i.id, label: i.name }));
-const termOptions = terms.map((t) => ({ value: t.id, label: `${t.season} ${t.year}` }));
+const reviews = [
+  { id: "r1", authorId: "u1", courseCode: "CSC443", instructorId: "abdelnour", termId: "fall-2026", rating: 5, createdAt: "2026-10-14" },
+  { id: "CSC310-r1", authorId: "u1", courseCode: "CSC310", instructorId: "abdelnour", termId: "fall-2026", rating: 5, createdAt: "2026-10-14" },
+  { id: "r2", authorId: "u2", courseCode: "CSC443", instructorId: "farhat", termId: "spring-2026", rating: 4, createdAt: "2026-05-02" },
+];
+const currentUser = { id: "u1", fullName: "Rea Khairallah" };
 
 const emptyForm = {
   courseCode: "",
@@ -53,6 +58,12 @@ export default function WriteReview() {
   }
 
   const shownErrorCount = Object.keys(shownErrors).length;
+
+  const existingReview = findExistingReview(reviews, form, currentUser.id);
+
+  const courseOptions = courses.map((c) => ({ value: c.code, label: `${c.code} · ${c.title}` }));
+  const instructorOptions = instructors.map((i) => ({ value: i.id, label: i.name }));
+  const termOptions = terms.map((t) => ({ value: t.id, label: `${t.season} ${t.year}` }));
 
   function updateField(name, value) {
     setForm({ ...form, [name]: value });
@@ -111,6 +122,10 @@ export default function WriteReview() {
             error={shownErrors.hoursPerWeek}
           />
         </div>
+
+        {existingReview && (
+          <AlreadyReviewedNotice review={existingReview} instructors={instructors} terms={terms} />
+        )}
 
         <fieldset
           className="flex flex-col gap-1.5"
