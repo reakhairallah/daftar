@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import SelectField from "../components/write-review/SelectField";
 import TextField from "../components/write-review/TextField";
 import StarRating from "../components/StarRating";
 import DifficultyMeter from "../components/DifficultyMeter";
 import FieldMessage from "../components/write-review/FieldMessage";
 import AlreadyReviewedNotice from "../components/write-review/AlreadyReviewedNotice";
+import EditRefused from "../components/write-review/EditRefused";
 import { labelClass } from "../components/write-review/fieldStyles";
 import { validateReview, MIN_BODY } from "../lib/validateReview";
 import { findExistingReview } from "../lib/findExistingReview";
@@ -26,9 +27,24 @@ const terms = [
   { id: "spring-2026", season: "Spring", year: 2026 },
 ];
 const reviews = [
-  { id: "r1", authorId: "u1", courseCode: "CSC443", instructorId: "abdelnour", termId: "fall-2026", rating: 5, createdAt: "2026-10-14" },
-  { id: "CSC310-r1", authorId: "u1", courseCode: "CSC310", instructorId: "abdelnour", termId: "fall-2026", rating: 5, createdAt: "2026-10-14" },
-  { id: "r2", authorId: "u2", courseCode: "CSC443", instructorId: "farhat", termId: "spring-2026", rating: 4, createdAt: "2026-05-02" },
+  {
+    id: "r1", authorId: "u1", courseCode: "CSC443", instructorId: "abdelnour", termId: "fall-2026",
+    rating: 5, difficulty: 3, hoursPerWeek: 7, wouldTakeAgain: true, anonymous: false,
+    body: "In CSC443, the weekly examples made the difficult concepts easier to follow.",
+    createdAt: "2026-10-14", updatedAt: null,
+  },
+  {
+    id: "CSC310-r1", authorId: "u1", courseCode: "CSC310", instructorId: "abdelnour", termId: "fall-2026",
+    rating: 5, difficulty: 5, hoursPerWeek: 11, wouldTakeAgain: true, anonymous: false,
+    body: "In CSC310, the pace picked up after the midterm, so planning ahead helped.",
+    createdAt: "2026-10-14", updatedAt: null,
+  },
+  {
+    id: "r2", authorId: "u2", courseCode: "CSC443", instructorId: "farhat", termId: "spring-2026",
+    rating: 4, difficulty: 3, hoursPerWeek: 6, wouldTakeAgain: true, anonymous: false,
+    body: "In CSC443, the assessments rewarded understanding more than memorization.",
+    createdAt: "2026-05-02", updatedAt: null,
+  },
 ];
 const currentUser = { id: "u1", fullName: "Rea Khairallah" };
 const setReviews = (newList) => console.log("TEMP saved:", newList);
@@ -45,12 +61,40 @@ const emptyForm = {
   anonymous: false,
 };
 
+function reviewToForm(review) {
+  return {
+    courseCode: review.courseCode,
+    instructorId: review.instructorId,
+    termId: review.termId,
+    hoursPerWeek: String(review.hoursPerWeek),
+    rating: review.rating,
+    difficulty: review.difficulty,
+    wouldTakeAgain: review.wouldTakeAgain,
+    body: review.body,
+    anonymous: review.anonymous,
+  };
+}
 
 export default function WriteReview() {
-  const [form, setForm] = useState(emptyForm);
+  const { reviewId } = useParams();
+  return <ReviewForm key={reviewId ?? "new"} reviewId={reviewId} />;
+}
+
+function ReviewForm({ reviewId }) {
+  const editingReview = reviews.find((review) => review.id === reviewId);
+  const isEditing = Boolean(editingReview);
+
+  const [form, setForm] = useState(isEditing ? reviewToForm(editingReview) : emptyForm);
   const [touched, setTouched] = useState({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const navigate = useNavigate();
+
+  if (reviewId && !editingReview) {
+    return <EditRefused title="This review does not exist" text="It may have been deleted, or the link is wrong." />;
+  }
+  if (editingReview && editingReview.authorId !== currentUser.id) {
+    return <EditRefused title="You can only edit your own reviews" text="This review was written by someone else." />;
+  }
 
   const errors = validateReview(form);
 
@@ -61,7 +105,7 @@ export default function WriteReview() {
 
   const shownErrorCount = Object.keys(shownErrors).length;
 
-  const existingReview = findExistingReview(reviews, form, currentUser.id);
+  const existingReview = findExistingReview(reviews, form, currentUser.id, editingReview?.id);
 
   const courseOptions = courses.map((c) => ({ value: c.code, label: `${c.code} · ${c.title}` }));
   const instructorOptions = instructors.map((i) => ({ value: i.id, label: i.name }));
@@ -79,22 +123,24 @@ export default function WriteReview() {
     const hasErrors = Object.keys(errors).length > 0;
     if (hasErrors || existingReview) return;
 
-    const newReview = {
-      ...form,
-      id: crypto.randomUUID(),
-      authorId: currentUser.id,
-      hoursPerWeek: Number(form.hoursPerWeek),
-      body: form.body.trim(),
-      createdAt: new Date().toISOString().slice(0, 10),
-      updatedAt: null,
-    };
-    setReviews([...reviews, newReview]);
+    const fields = { ...form, hoursPerWeek: Number(form.hoursPerWeek), body: form.body.trim() };
+    const today = new Date().toISOString().slice(0, 10);
+
+    if (isEditing) {
+      const updatedReview = { ...editingReview, ...fields, updatedAt: today };
+      setReviews(reviews.map((review) => (review.id === editingReview.id ? updatedReview : review)));
+    } else {
+      const newReview = { ...fields, id: crypto.randomUUID(), authorId: currentUser.id, createdAt: today, updatedAt: null };
+      setReviews([...reviews, newReview]);
+    }
     navigate("/me/reviews");
   }
 
   return (
     <>
-      <h1 className="font-display text-4xl font-semibold tracking-tight text-ink">Write a review</h1>
+      <h1 className="font-display text-4xl font-semibold tracking-tight text-ink">
+        {isEditing ? "Edit your review" : "Write a review"}
+      </h1>
       <p className="mt-2 max-w-prose text-sm text-muted">
         One review per course, per instructor, per term. You can come back and edit it; you cannot post a second one.
       </p>
@@ -222,7 +268,7 @@ export default function WriteReview() {
 
         <div className="flex flex-wrap items-center gap-3 border-t border-line pt-6">
           <button type="submit" className="rounded bg-brand-700 px-4 py-2.5 text-sm font-semibold text-paper hover:bg-brand-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
-            Post review
+            {isEditing ? "Save changes" : "Post review"}
           </button>
           <Link to="/me/reviews" className="rounded px-4 py-2.5 text-sm font-semibold text-muted hover:bg-brand-50 hover:text-ink">
             Cancel

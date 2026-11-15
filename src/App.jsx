@@ -12,6 +12,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/reviews/new" element={<WriteReview />} />
+        <Route path="/reviews/:reviewId/edit" element={<WriteReview />} />
         <Route path="/me/reviews" element={<MyReviews />} />
         <Route path="*" element={<NotFound />} />
       </Route>
