@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SelectField from "../components/write-review/SelectField";
 import TextField from "../components/write-review/TextField";
 import StarRating from "../components/StarRating";
@@ -10,7 +10,7 @@ import { labelClass } from "../components/write-review/fieldStyles";
 import { validateReview, MIN_BODY } from "../lib/validateReview";
 import { findExistingReview } from "../lib/findExistingReview";
 
-// TEMP: same shape as Cloey's useAppData(). Replace with: const { courses, instructors, terms, reviews, currentUser } = useAppData();
+// TEMP: same shape as Cloey's useAppData(). Replace with: const { courses, instructors, terms, reviews, setReviews, currentUser } = useAppData();
 const courses = [
   { code: "CSC443", title: "Web Programming" },
   { code: "CSC310", title: "Algorithms" },
@@ -31,6 +31,7 @@ const reviews = [
   { id: "r2", authorId: "u2", courseCode: "CSC443", instructorId: "farhat", termId: "spring-2026", rating: 4, createdAt: "2026-05-02" },
 ];
 const currentUser = { id: "u1", fullName: "Rea Khairallah" };
+const setReviews = (newList) => console.log("TEMP saved:", newList);
 
 const emptyForm = {
   courseCode: "",
@@ -49,6 +50,7 @@ export default function WriteReview() {
   const [form, setForm] = useState(emptyForm);
   const [touched, setTouched] = useState({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
+  const navigate = useNavigate();
 
   const errors = validateReview(form);
 
@@ -73,6 +75,21 @@ export default function WriteReview() {
   function handleSubmit(e) {
     e.preventDefault();
     setSubmitAttempted(true);
+
+    const hasErrors = Object.keys(errors).length > 0;
+    if (hasErrors || existingReview) return;
+
+    const newReview = {
+      ...form,
+      id: crypto.randomUUID(),
+      authorId: currentUser.id,
+      hoursPerWeek: Number(form.hoursPerWeek),
+      body: form.body.trim(),
+      createdAt: new Date().toISOString().slice(0, 10),
+      updatedAt: null,
+    };
+    setReviews([...reviews, newReview]);
+    navigate("/me/reviews");
   }
 
   return (
