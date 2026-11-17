@@ -1,7 +1,8 @@
-import { useState } from "react";
-import CourseCard from "../components/CourseCard";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useAppData } from "../state/AppContext";
-import { getCourseResults } from "./courseResults";
+import { getCourseResults } from "./courseResults.js";
+import CourseResults from "./CourseResults.jsx";
 
 const fieldClass =
   "w-full rounded border border-line bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-100";
@@ -10,14 +11,36 @@ const labelClass =
 
 export default function Courses() {
   const { courses, reviews } = useAppData();
+  const [params, setParams] = useSearchParams();
+  const requestedState = params.get("state");
+  const viewState = ["loading", "empty", "error"].includes(requestedState)
+    ? requestedState
+    : "populated";
   const [query, setQuery] = useState("");
   const [department, setDepartment] = useState("");
   const [sortBy, setSortBy] = useState("rating");
-  const visibleCourses = getCourseResults(courses, reviews, {
+  // The empty demonstration uses the reference's existing, unreviewed course.
+  const displayedCourses = viewState === "empty"
+    ? courses.filter((course) => course.code === "CSC498")
+    : courses;
+  const displayedReviews = viewState === "empty" ? [] : reviews;
+  const visibleCourses = getCourseResults(displayedCourses, displayedReviews, {
     query,
     department,
     sortBy,
   });
+
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = "Courses — Daftar";
+    return () => { document.title = previousTitle; };
+  }, []);
+
+  function retry() {
+    const next = new URLSearchParams(params);
+    next.delete("state");
+    setParams(next, { replace: true });
+  }
 
   function clearFilters() {
     setQuery("");
@@ -94,33 +117,21 @@ export default function Courses() {
         </button>
         <span className="flex-1" aria-hidden="true" />
         <p role="status" className="font-mono text-xs text-muted">
-          {visibleCourses.length} {visibleCourses.length === 1 ? "course" : "courses"}
+          {viewState === "loading" ? "Loading courses…" : viewState === "error" ? "Results unavailable" : (
+            <>{visibleCourses.length} {visibleCourses.length === 1 ? "course" : "courses"}</>
+          )}
         </p>
       </form>
 
-      {visibleCourses.length > 0 ? (
-        <ul className="mt-5 space-y-3" aria-label="Course results">
-          {visibleCourses.map((course) => (
-            <CourseCard key={course.code} course={course} reviews={reviews} />
-          ))}
-        </ul>
-      ) : (
-        <section className="mt-5 rounded-card border border-dashed border-line bg-surface px-6 py-14 text-center">
-          <h2 className="font-display text-2xl font-semibold tracking-tight">
-            No courses match your filters
-          </h2>
-          <p className="mt-3 text-sm text-muted">
-            Try another course code or title, or clear the filters to see all courses.
-          </p>
-          <button
-            type="button"
-            className="mt-7 rounded bg-brand-700 px-4 py-2.5 text-sm font-semibold text-paper hover:bg-brand-800"
-            onClick={clearFilters}
-          >
-            Clear filters
-          </button>
-        </section>
-      )}
+      <div className="mt-5">
+        <CourseResults
+          state={viewState}
+          courses={visibleCourses}
+          reviews={displayedReviews}
+          onRetry={retry}
+          onClear={clearFilters}
+        />
+      </div>
     </>
   );
 }

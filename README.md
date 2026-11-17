@@ -9,7 +9,7 @@ Daftar collects what a course was actually like — with a named instructor, in 
 | File | Surface | Owner |
 |---|---|---|
 | `01-home.html` → `src/home/Home.jsx` | Home — the pitch, a live summary, the highest rated | Cloey |
-| `02-courses.html` | Courses — search and filters, four data states | Cloey |
+| `02-courses.html` → `src/courses/Courses.jsx` | Courses — search and filters, four data states | Cloey |
 | `03-course.html` | Course detail — the summary, the reviews, three viewer variants | Nelly |
 | `04-instructor.html` | Instructor — their courses, and the honest way to average them | Nelly |
 | `05-write.html` | Write a review — validation, anonymity, the one-review rule refusing | Rea |
@@ -117,10 +117,14 @@ The supplied Newsreader and Libre Franklin font faces are embedded in `src/asset
 
 ```
 src/
-  components/     shared pieces (RatingSummary, StarRating, DifficultyMeter, ReviewCard, Header)
-  pages/          one file per surface (HomePage, ComparePage, AuthPage, ...)
-  data/           Phase 1 mock data (users, courses, instructors, reviews)
-  lib/            pure functions (summarise reviews, sharedMax, validation)
+  home/           Home surface
+  courses/        Courses surface, result states, search and sorting
+  components/     shared Layout, CourseCard, RatingSummary, DataState
+  pages/          starter review pages and NotFound; teammate pages await integration
+  data/           Phase 1 mock data (users, courses, instructors, terms, reviews)
+  lib/            shared review calculations
+  state/          shared in-memory data provider
+  assets/         supplied fonts
   App.jsx         routes
   main.jsx        entry point
 ```
@@ -141,4 +145,14 @@ The Home route supports `?state=loading`, `?state=empty`, and `?state=error`. Tr
 
 Run `npm run test:home` and `npm run build` to check it. The header uses the seeded current user and derives their initials from their name; a null current user renders the signed-out variant.
 
-See [Home implementation and route handoff](docs/home.md) for file ownership, data flow, test URLs, and integration details. Courses, course detail, instructor, and sign-in destinations still need their owners' route elements merged; their links are not proof that those surfaces are complete. Full team submission details (student IDs, live URL, remaining file mappings) still need to be supplied by the team.
+See [Home implementation and route handoff](docs/home.md) for file ownership, data flow, test URLs, and integration details. Home and Courses are connected in this branch. Course detail, instructor, review, and sign-in destinations still need the team's completed pages integrated. Full team submission details (student IDs, live URL, remaining file mappings) still need to be supplied by the team.
+
+## Courses implementation
+
+Reference: `02-courses.html` in the supplied design pack. The route is `/courses`, implemented in `src/courses/Courses.jsx`. It reuses the shared provider, course cards, and review calculations.
+
+Search matches course codes and titles without case sensitivity. Department and search filters combine. Sort options use calculated rating, difficulty, weekly hours, or review count; courses without reviews appear last. Averages include all posted reviews across terms. The provisional catalogue has four courses, including unreviewed CSC498.
+
+Use `/courses?state=loading`, `/courses?state=empty`, and `/courses?state=error` to demonstrate the required states. Searching CSC498 also shows a genuine no-review state, separately from a search with no matching courses. Retry removes only the state parameter and retains the current filter selections.
+
+Run `npm run test:courses`, `npm run test:home`, and `npm run build`. See [Courses files and integration](docs/courses.md) for the file mapping, state examples, and remaining team route connections.

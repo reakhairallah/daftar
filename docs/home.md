@@ -56,11 +56,11 @@ These are deliberate Phase 1 simulations. Loading stays visible until the URL ch
 
 ## Route handoff
 
-The Home branch does not contain the other owners' completed screens. Its outgoing route contracts are:
+The Courses branch includes the completed Home implementation and the Courses route. Other owners' completed screens still need integration. The outgoing route contracts are:
 
 | Destination | Route | Current status in this branch |
 | --- | --- | --- |
-| Courses | `/courses` | Courses surface still to be added |
+| Courses | `/courses` | Implemented on cloey/courses; team merge pending |
 | Course detail | `/courses/:courseId` | Matches Nelly's branch; merge still required |
 | Instructor | `/instructors/:id` | Expected profile route; default header link opens Abdelnour |
 | Write review | `/reviews/new` | Team starter placeholder currently present |

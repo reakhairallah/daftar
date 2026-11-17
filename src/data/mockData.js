@@ -68,6 +68,13 @@ export const courses = [
     credits: 3,
     coRequisite: null,
   },
+  {
+    code: "CSC498",
+    title: "Special Topics in Computer Science",
+    department: "Computer Science & Mathematics",
+    credits: 3,
+    coRequisite: null,
+  },
 ];
 function makeReviews(
   courseCode,

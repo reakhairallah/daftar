@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:home": "node --test tests/home.test.mjs tests/home-render.test.mjs"
+    "test:home": "node --test tests/home.test.mjs tests/home-render.test.mjs",
+    "test:courses": "node --test tests/courses.test.mjs tests/courses-render.test.mjs"
   },
   "dependencies": {
     "react": "^19.3.1",
