@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { reviewsForCourse, summarizeReviews } from "../lib/reviewSummaries";
-// ⚠️ CHANGE THIS LINE: copy the import the Courses page uses for courses and reviews.
-import { courses, reviews } from "../data/CHANGE_ME";
+import { courses, homeReviews as reviews } from "../data/mockData";
 import AddCourseForm from "../components/comparecomponents/AddCourseForm";
 import CompareCard from "../components/comparecomponents/CompareCard";
 import EmptySlot from "../components/comparecomponents/EmptySlot";
