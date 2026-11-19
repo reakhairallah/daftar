@@ -1,19 +1,17 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { calculateRatingSummary } from "../utils/ratingUtils";
-import {
-  sampleCourses,
-  sampleInstructors,
-  sampleReviews,
-} from "../data/sampleData";
+import { useAppData } from "../state/AppContext";
 
 export default function Instructor() {
   const { instructorId } = useParams();
   const [searchParams] = useSearchParams();
   const pageState = searchParams.get("state");
 
-  const instructor = sampleInstructors.find((item) => item.id === instructorId);
+  const { courses, instructors, reviews, terms } = useAppData();
 
-  const instructorReviews = sampleReviews.filter(
+  const instructor = instructors.find((item) => item.id === instructorId);
+
+  const instructorReviews = reviews.filter(
     (review) => review.instructorId === instructorId,
   );
 
@@ -21,7 +19,7 @@ export default function Instructor() {
 
   const summary = calculateRatingSummary(visibleReviews);
 
-  const coursesWithRatings = sampleCourses
+  const coursesWithRatings = courses
     .filter((course) =>
       instructorReviews.some((review) => review.courseCode === course.code),
     )
@@ -30,8 +28,16 @@ export default function Instructor() {
         (review) => review.courseCode === course.code,
       );
 
+      const courseTerms = [
+        ...new Set(courseReviews.map((review) => review.termId)),
+      ]
+        .map((id) => terms.find((term) => term.id === id))
+        .filter(Boolean)
+        .map((term) => `${term.season} ${term.year}`);
+
       return {
         ...course,
+        term: courseTerms.join(", "),
         summary: calculateRatingSummary(courseReviews),
       };
     });
@@ -46,12 +52,14 @@ export default function Instructor() {
     ...ratingDistribution.map((item) => item.count),
   );
 
+  // Loading state
   if (pageState === "loading") {
     return (
       <div role="status" className="py-16 text-center">
         <h1 className="font-display text-2xl font-semibold text-ink">
           Loading instructor...
         </h1>
+
         <p className="mt-2 text-sm text-muted">
           Getting instructor information and reviews.
         </p>
@@ -59,6 +67,7 @@ export default function Instructor() {
     );
   }
 
+  // Error state
   if (pageState === "error") {
     return (
       <section
@@ -83,9 +92,10 @@ export default function Instructor() {
     );
   }
 
+  // Instructor not found
   if (!instructor) {
     return (
-      <div className="py-10">
+      <section className="py-10">
         <h1 className="font-display text-2xl font-semibold text-ink">
           Instructor not found
         </h1>
@@ -93,7 +103,14 @@ export default function Instructor() {
         <p className="mt-2 text-sm text-muted">
           We couldn't find the instructor you're looking for.
         </p>
-      </div>
+
+        <Link
+          to="/courses"
+          className="mt-4 inline-block text-sm font-semibold text-brand-700 hover:underline"
+        >
+          Back to courses
+        </Link>
+      </section>
     );
   }
 
@@ -116,6 +133,7 @@ export default function Instructor() {
         </Link>
 
         <span className="mx-2 text-brand-500">/</span>
+
         {instructor.name}
       </nav>
 
@@ -150,6 +168,7 @@ export default function Instructor() {
             {summary.count > 0 && (
               <span
                 className="pb-1 text-lg text-amber-500"
+                role="img"
                 aria-label={`${summary.averageRating.toFixed(1)} out of 5 stars`}
               >
                 {"★".repeat(Math.round(summary.averageRating))}
@@ -165,7 +184,7 @@ export default function Instructor() {
       </section>
 
       {/* Empty state */}
-      {pageState === "empty" || summary.count === 0 ? (
+      {summary.count === 0 ? (
         <section className="mt-8 rounded-card border border-line bg-surface p-8 text-center">
           <h2 className="font-display text-2xl font-semibold text-ink">
             No reviews yet
@@ -203,7 +222,8 @@ export default function Instructor() {
                       </Link>
 
                       <p className="mt-1 text-xs text-muted">
-                        {course.term} · {course.summary.count} reviews
+                        {course.term && `${course.term} · `}
+                        {course.summary.count} reviews
                       </p>
                     </div>
 
@@ -280,7 +300,11 @@ export default function Instructor() {
                       {stars}
                     </span>
 
-                    <div className="h-5 min-w-0 flex-1 overflow-hidden rounded bg-brand-50">
+                    <div
+                      className="h-5 min-w-0 flex-1 overflow-hidden rounded bg-brand-50"
+                      role="img"
+                      aria-label={`${count} reviews with ${stars} stars`}
+                    >
                       <div
                         className="h-full rounded bg-brand-600"
                         style={{
