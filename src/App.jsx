@@ -1,8 +1,7 @@
-
 import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
-import Home from "./pages/Home";
-import Courses from "./pages/Courses";
+import Home from "./home/Home";
+import Courses from "./courses/Courses";
 import WriteReview from "./pages/WriteReview";
 import MyReviews from "./pages/MyReviews";
 import NotFound from "./pages/NotFound";
