@@ -1,3 +1,5 @@
+@import "./assets/fonts.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,5 +7,10 @@
 @layer base {
   body {
     @apply bg-paper font-body text-ink antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid #72293a;
+    outline-offset: 3px;
   }
 }
