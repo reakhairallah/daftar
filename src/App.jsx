@@ -16,6 +16,7 @@ export default function App() {
         <Route path="*" element={<NotFound />} />
         <Route path="/signin" element={<AuthPage mode="signin" />} />
         <Route path="register" element={<AuthPage mode="register"/>} />
+       
       </Route>
 
     </Routes>
