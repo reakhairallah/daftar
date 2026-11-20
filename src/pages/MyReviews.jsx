@@ -1,9 +1,9 @@
 import { useSearchParams } from "react-router-dom";
 import ReviewCard from "../components/my-reviews/ReviewCard";
 import EmptyReviews from "../components/my-reviews/EmptyReviews";
-import DataState from "../components/TempDataState";
+import DataState from "../components/DataState";
 import SignInRedirect from "../components/SignInRedirect";
-import { useAppData } from "../lib/tempAppData";
+import { useAppData } from "../state/AppContext";
 import { termLabel, instructorLastName } from "../lib/reviewLabels";
 
 export default function MyReviews() {
