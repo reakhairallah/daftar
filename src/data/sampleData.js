@@ -1,0 +1,77 @@
+export const sampleCourses = [
+  {
+    code: "CSC443",
+    title: "Web Programming",
+    department: "Computer Science",
+    credits: 3,
+    coRequisite: "CSC375",
+    term: "Fall 2026",
+  },
+  {
+    code: "CSC245",
+    title: "Object-Oriented Programming",
+    department: "Computer Science",
+    credits: 3,
+    coRequisite: null,
+    term: "Spring 2026",
+  },
+];
+
+export const sampleInstructors = [
+  {
+    id: "abdelnour",
+    name: "Nagib Abdelnour",
+    department: "Computer Science",
+  },
+];
+
+export const sampleReviews = [
+  {
+    id: "r1",
+    authorId: "u1",
+    authorName: "Rea Khairallah",
+    courseCode: "CSC443",
+    instructorId: "abdelnour",
+    instructorName: "Abdelnour",
+    termId: "fall-2026",
+    termName: "Fall 2026",
+    rating: 5,
+    difficulty: 3,
+    hoursPerWeek: 7,
+    wouldTakeAgain: true,
+    body: "The course was interesting and the projects were useful.",
+    anonymous: false,
+  },
+  {
+    id: "r2",
+    authorId: "u2",
+    authorName: "Student",
+    courseCode: "CSC443",
+    instructorId: "abdelnour",
+    instructorName: "Abdelnour",
+    termId: "spring-2026",
+    termName: "Spring 2026",
+    rating: 4,
+    difficulty: 4,
+    hoursPerWeek: 8,
+    wouldTakeAgain: true,
+    body: "Good explanations, but some assignments took a lot of time.",
+    anonymous: true,
+  },
+  {
+    id: "r3",
+    authorId: "u3",
+    authorName: "Student",
+    courseCode: "CSC245",
+    instructorId: "abdelnour",
+    instructorName: "Abdelnour",
+    termId: "spring-2026",
+    termName: "Spring 2026",
+    rating: 3,
+    difficulty: 3,
+    hoursPerWeek: 6,
+    wouldTakeAgain: false,
+    body: "The lectures were helpful, although the exams were challenging.",
+    anonymous: false,
+  },
+];
