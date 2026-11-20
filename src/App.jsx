@@ -23,6 +23,7 @@ export default function App() {
           <Route path="/instructors/:instructorId" element={<Instructor />} />
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/reviews/new" element={<WriteReview />} />
+          <Route path="/reviews/:reviewId/edit" element={<WriteReview />} />
           <Route path="/me/reviews" element={<MyReviews />} />
           <Route path="/signin" element={<AuthPage mode="signin" />} />
           <Route path="/register" element={<AuthPage mode="register" />} />
