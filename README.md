@@ -2,32 +2,46 @@
 
 Daftar collects what a course was actually like — with a named instructor, in a named term — and turns it into numbers students can use in registration week. One review per user, per course, per instructor, per term.
 
+**Live:** https://daftar-reviews.vercel.app
+
 ---
 
-## Work Division
+## Team
 
-| File | Surface | Owner |
+**Team Daftar** · CSC443 Web Programming, Fall 2026, Section 31 · Topic 05 · Brief reference `CSC443-F26 · T05 · rev A`
+
+| Member | Student ID |
+|---|---|
+| Cloey El Cham | 202408147 |
+| Nelly Torbey | 202304643 |
+| Rea Khairallah | 202404400 |
+| Shahd Mughrabi | 202301406 |
+
+---
+
+## Who owns what
+
+Files are listed by the member who committed them. A folder means every file inside it.
+
+| Member | Surfaces (design file → route) | Files |
 |---|---|---|
-| `01-home.html` → `src/home/Home.jsx` | Home — the pitch, a live summary, the highest rated | Cloey |
-| `02-courses.html` → `src/courses/Courses.jsx` | Courses — search and filters, four data states | Cloey |
-| `03-course.html` | Course detail — the summary, the reviews, three viewer variants | Nelly |
-| `04-instructor.html` | Instructor — their courses, and the honest way to average them | Nelly |
-| `05-write.html` | Write a review — validation, anonymity, the one-review rule refusing | Rea |
-| `06-myreviews.html` | My reviews — everything you wrote, anonymous ones included | Rea |
-| `07-compare.html` | Compare — up to three courses on one shared scale | Shahd |
-| `08-auth.html` | Sign in and register — both states, plus a rejected sign-in | Shahd |
+| Cloey | Home (`01-home.html` → `/`)<br>Courses (`02-courses.html` → `/courses`) | `src/home/`, `src/courses/`, `src/state/`, `tests/`<br>`src/components/`: `CourseCard.jsx`, `DataState.jsx`, `RatingSummary.jsx`<br>`src/data/mockData.js`, `src/lib/reviewSummaries.js`, `src/assets/fonts.css` |
+| Nelly | Course detail (`03-course.html` → `/courses/:courseId`)<br>Instructor (`04-instructor.html` → `/instructors/:instructorId`) | `src/pages/`: `CourseDetail.jsx`, `Instructor.jsx`<br>`src/components/ReviewList.jsx`, `src/utils/`, `src/data/sampleData.js` |
+| Rea | Write a review (`05-write.html` → `/reviews/new`, `/reviews/:reviewId/edit`)<br>My reviews (`06-myreviews.html` → `/me/reviews`) | `src/pages/`: `WriteReview.jsx`, `MyReviews.jsx`, `NotFound.jsx`<br>`src/components/write-review/`, `src/components/my-reviews/`<br>`src/components/`: `StarRating.jsx`, `DifficultyMeter.jsx`, `Badge.jsx`, `SignInRedirect.jsx`<br>`src/lib/`: `validateReview.js`, `findExistingReview.js`, `useUnsavedChangesWarning.js`, `reviewLabels.js`<br>`src/main.jsx`, `vercel.json` |
+| Shahd | Compare (`07-compare.html` → `/compare`)<br>Sign in and register (`08-auth.html` → `/signin`, `/register`) | `src/pages/ComparePage.jsx`, `src/pages/auth/`<br>`src/components/comparecomponents/`, `src/components/authcomponents/` |
+
+**Shared:** `src/App.jsx` (everyone added their own routes), `src/components/Layout.jsx` and `src/index.css` (Cloey and Rea).
 
 ---
 
 ## Tech stack
 
-**Frontend**
-
-- **React** with **Vite**
+- **React 19** with **Vite**
 - **Tailwind CSS v3.4**
-- **React Router**
+- **React Router v7**
+- **ESLint**
 
-**Backend**
+Phase 1 has no backend. All data lives in React state and resets when the page reloads.
 
 ---
 
@@ -43,6 +57,21 @@ npm run dev
 ```
 
 Open the URL Vite prints (usually `http://localhost:5173`).
+
+Other scripts:
+
+```bash
+npm run build          # production build into dist/
+npm run lint           # ESLint
+npm run test:home      # Home tests
+npm run test:courses   # Courses tests
+```
+
+---
+
+## Deployment
+
+The site is deployed on Vercel from the `main` branch; every merge into `main` redeploys it. `vercel.json` rewrites every path to `index.html`, so routes like `/me/reviews` also work when opened directly or refreshed.
 
 ---
 
@@ -119,40 +148,52 @@ The supplied Newsreader and Libre Franklin font faces are embedded in `src/asset
 src/
   home/           Home surface
   courses/        Courses surface, result states, search and sorting
-  components/     shared Layout, CourseCard, RatingSummary, DataState
-  pages/          starter review pages and NotFound; teammate pages await integration
-  data/           Phase 1 mock data (users, courses, instructors, terms, reviews)
-  lib/            shared review calculations
+  pages/          Course detail, Instructor, Write a review, My reviews, Compare, Auth, NotFound
+  components/     shared components (Layout, DataState, RatingSummary, StarRating…) plus one folder per surface
+  data/           Phase 1 mock data
   state/          shared in-memory data provider
+  lib/            plain JS helpers: review calculations, validation, the one-review rule
+  utils/          rating calculations used by the Instructor page
   assets/         supplied fonts
   App.jsx         routes
-  main.jsx        entry point
+  main.jsx        entry point and router setup
 ```
 
 ---
 
 ## Data model
 
-In short: we store `User`, `Course`, `Instructor` and `Review`. Every average, count and percentage (`CourseSummary`) is computed from the reviews that currently exist. Nothing is cached.
+We store four entities, plus the terms a review can belong to. Every average, count and percentage is computed from the reviews that currently exist; nothing is cached.
+
+| Entity | Fields |
+|---|---|
+| User | `id`, `fullName`, `email`, `major` |
+| Course | `code`, `title`, `department`, `credits`, `coRequisite` |
+| Instructor | `id`, `name`, `department` |
+| Term | `id`, `season`, `year` |
+| Review | `id`, `authorId`, `courseCode`, `instructorId`, `termId`, `rating` (1–5), `difficulty` (1–5), `hoursPerWeek`, `wouldTakeAgain`, `body`, `anonymous`, `createdAt`, `updatedAt` |
+
+A review links to its author, course, instructor and term by id. The house rule is one review per `authorId` + `courseCode` + `instructorId` + `termId`.
+
+### Mock data
+
+- **Where:** `src/data/mockData.js`, loaded once by `src/state/AppProvider.jsx`.
+- **What:** 4 courses (CSC498 has no reviews yet, on purpose), 1 instructor, 3 terms, 52 users and 134 reviews written as real comments.
+- **How pages use it:** every surface calls `useAppData()` from `src/state/AppContext.js`, which returns the data plus `setReviews` and `setCurrentUser`. Because the provider wraps all routes, a review posted or edited on one page shows up everywhere. Nothing is saved to `localStorage`: reloading restores the original data.
+- The signed-in user is `u1` (Rea Khairallah), who owns three of the reviews.
 
 ---
 
-## Home implementation
+## Trying the data states
 
-Reference: `CSC443-F26 · T05 · rev A`. Home's React source is `src/home/Home.jsx`. Shared fixture data lives in `src/data/mockData.js`; the single shared in-memory provider is `src/state/AppProvider.jsx`. No localStorage or backend is used. Other surfaces should use `useAppData()` from `src/state/AppContext.js` so review changes update Home's summaries too.
+Add `?state=loading`, `?state=empty` or `?state=error` to these pages to see each state:
 
-The Home route supports `?state=loading`, `?state=empty`, and `?state=error`. Try again removes only the state parameter. Home includes the populated rating summary, a calculated top three for Fall 2026, the three review-policy cards, and shared navigation/footer.
+| Page | Example |
+|---|---|
+| Home | `/?state=loading` |
+| Courses | `/courses?state=empty` |
+| Course detail | `/courses/CSC443?state=error` |
+| Instructor | `/instructors/abdelnour?state=loading` |
+| My reviews | `/me/reviews?state=empty` |
 
-Run `npm run test:home` and `npm run build` to check it. The header uses the seeded current user and derives their initials from their name; a null current user renders the signed-out variant.
-
-See [Home implementation and route handoff](docs/home.md) for file ownership, data flow, test URLs, and integration details. Home and Courses are connected in this branch. Course detail, instructor, review, and sign-in destinations still need the team's completed pages integrated. Full team submission details (student IDs, live URL, remaining file mappings) still need to be supplied by the team.
-
-## Courses implementation
-
-Reference: `02-courses.html` in the supplied design pack. The route is `/courses`, implemented in `src/courses/Courses.jsx`. It reuses the shared provider, course cards, and review calculations.
-
-Search matches course codes and titles without case sensitivity. Department and search filters combine. Sort options use calculated rating, difficulty, weekly hours, or review count; courses without reviews appear last. Averages include all posted reviews across terms. The provisional catalogue has four courses, including unreviewed CSC498.
-
-Use `/courses?state=loading`, `/courses?state=empty`, and `/courses?state=error` to demonstrate the required states. Searching CSC498 also shows a genuine no-review state, separately from a search with no matching courses. Retry removes only the state parameter and retains the current filter selections.
-
-Run `npm run test:courses`, `npm run test:home`, and `npm run build`. See [Courses files and integration](docs/courses.md) for the file mapping, state examples, and remaining team route connections.
+**Try again** removes the state parameter.
